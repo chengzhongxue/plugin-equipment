@@ -1,29 +1,26 @@
+import EquipmentList from "@/views/EquipmentList.vue";
 import { definePlugin } from "@halo-dev/console-shared";
-import HomeView from "./views/HomeView.vue";
-import { IconPlug } from "@halo-dev/components";
 import { markRaw } from "vue";
+import TablerDeviceGamepad3 from '~icons/tabler/device-gamepad-3'
+
 
 export default definePlugin({
-  components: {},
   routes: [
     {
       parentName: "Root",
       route: {
-        path: "/example",
-        name: "Example",
-        component: HomeView,
+        path: "/equipments",
+        name: "Equipments",
+        component: EquipmentList,
         meta: {
-          title: "示例页面",
-          searchable: true,
+          permissions: ["plugin:equipment:view"],
           menu: {
-            name: "示例页面",
-            group: "示例分组",
-            icon: markRaw(IconPlug),
-            priority: 0,
+            name: "装备",
+            group: "content",
+            icon: markRaw(TablerDeviceGamepad3),
           },
         },
       },
     },
   ],
-  extensionPoints: {},
 });

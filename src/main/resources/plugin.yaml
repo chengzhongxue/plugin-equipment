@@ -1,22 +1,22 @@
-# Refer https://docs.halo.run/developer-guide/plugin/basics/manifest
-
 apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
-  # The name defines how the plugin is invoked, A unique name
-  name: starter
+  name: equipment
 spec:
   enabled: true
-  requires: ">=2.20.0"
+  version: 1.0.0
+  requires: ">=2.21.0"
   author:
-    name: Halo
-    website: https://github.com/halo-dev
-  logo: logo.png
-  homepage: https://github.com/halo-dev/plugin-starter#readme
-  repo: https://github.com/halo-dev/plugin-starter
-  issues: https://github.com/halo-dev/plugin-starter/issues
-  displayName: "插件快速开始模板"
-  description: "这是一个插件快速开始模板"
+    name: 困困鱼
+    website: https://github.com/chengzhongxue
+  logo: logo.svg
+  homepage: 
+  repo: https://github.com/chengzhongxue/plugin-equipment
+  issues: https://github.com/chengzhongxue/plugin-equipment/issues
+  configMapName: equipment-configmap
+  settingName: equipment-settings
+  displayName: "装备管理"
+  description: "装备管理模块"
   license:
     - name: "GPL-3.0"
-      url: "https://github.com/halo-dev/plugin-starter/blob/main/LICENSE"
+      url: "https://github.com/chengzhongxue/plugin-equipment/blob/main/LICENSE"
