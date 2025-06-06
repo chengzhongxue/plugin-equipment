@@ -2,6 +2,8 @@
 
 Halo 2.0 的装备管理插件, 支持在 Console 进行管理以及为主题端提供 `/equipments` 页面路由。
 
+插件由 [图库管理](https://www.halo.run/store/apps/app-BmQJW) 插件 改编而来
+
 ## 使用方式
 
 1. 下载，目前提供以下两个下载方式：
