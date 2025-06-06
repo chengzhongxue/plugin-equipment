@@ -11,7 +11,8 @@ Halo 2.0 的装备管理插件, 支持在 Console 进行管理以及为主题端
     - Halo 应用市场：<https://halo.run/store/apps/app-BmQJW>
 2. 安装，插件安装和更新方式可参考：<https://docs.halo.run/user-guide/plugins>
 3. 安装完成之后，访问 Console 左侧的**装备**菜单项，即可进行管理。
-4. 前台访问地址为 `/equipments`，需要注意的是，此插件需要主题提供模板（equipments.html）才能访问 `/equipments`。
+4. 内置模板，无需主题支持，但也可以通过主题自定义模板。
+5. 前台访问地址为 `/equipments`，主题提供模板（equipments.html）。
 
 ## 开发环境
 
