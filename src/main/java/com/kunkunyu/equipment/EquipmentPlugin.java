@@ -3,6 +3,7 @@ package com.kunkunyu.equipment;
 import static run.halo.app.extension.index.IndexAttributeFactory.simpleAttribute;
 
 import org.springframework.stereotype.Component;
+import run.halo.app.extension.Scheme;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.extension.index.IndexSpec;
 import run.halo.app.plugin.BasePlugin;
@@ -53,7 +54,7 @@ public class EquipmentPlugin extends BasePlugin {
 
     @Override
     public void stop() {
-        schemeManager.unregister(schemeManager.get(Equipment.class));
-        schemeManager.unregister(schemeManager.get(EquipmentGroup.class));
+        schemeManager.unregister(Scheme.buildFromType(Equipment.class));
+        schemeManager.unregister(Scheme.buildFromType(EquipmentGroup.class));
     }
 }
