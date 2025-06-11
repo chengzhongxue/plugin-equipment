@@ -10,6 +10,13 @@ Halo 2.0 的装备管理插件, 支持在 Console 进行管理以及为主题端
 3. 内置模板，无需主题支持，但也可以通过主题自定义模板。
 4. 前台访问地址为 `/equipments`，主题提供模板（equipments.html）。
 
+## 交流群
+* 添加企业微信 （备注进群）
+  <img width="360" src="https://api.minio.yyds.pink/kunkunyu/files/2025/02/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20250212142105-pbceif.jpg" />
+
+* QQ群
+  <img width="360" src="https://api.minio.yyds.pink/kunkunyu/files/2025/05/qq-708998089-iqowsh.webp" />
+
 ## 开发环境
 
 ```bash
