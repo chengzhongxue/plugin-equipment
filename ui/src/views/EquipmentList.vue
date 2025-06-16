@@ -361,7 +361,7 @@ const onEditingModalClose = () => {
                     <VButton type="danger" @click="handleDeleteInBatch"> 删除 </VButton>
                   </VSpace>
                 </div>
-                <div v-if="selectedGroup" v-permission="['plugin:equipment:manage']" class="uno: mt-4 flex sm:mt-0">
+                <div v-if="selectedGroup" v-permission="['plugin:equipment:manage']" class=":uno: mt-4 flex sm:mt-0">
                   <VDropdown>
                     <VButton size="xs"> 新增 </VButton>
                     <template #popper>
@@ -384,7 +384,7 @@ const onEditingModalClose = () => {
                   <VButton @click="refetch"> 刷新</VButton>
                   <VButton v-permission="['plugin:equipment:manage']" type="primary" @click="handleOpenEditingModal()">
                     <template #icon>
-                      <IconAddCircle class="uno: size-full" />
+                      <IconAddCircle class=":uno: size-full" />
                     </template>
                     新增装备
                   </VButton>
@@ -395,7 +395,7 @@ const onEditingModalClose = () => {
           <Transition v-else appear name="fade">
             <VueDraggable
               v-model="equipments"
-              class="uno: grid grid-cols-1 mt-2 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+              class=":uno: grid grid-cols-1 mt-2 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
               group="equipment"
               handle=".drag-element"
               item-key="metadata.name"
@@ -406,16 +406,16 @@ const onEditingModalClose = () => {
               <VCard
                 v-for="equipment in equipments"
                 :key="equipment.metadata.name"
-                :body-class="['uno: !p-0']"
+                :body-class="[':uno: !p-0']"
                 :class="{
-                  'uno: ring-primary ring-1': isChecked(equipment),
-                  'uno: ring-1 ring-red-600': equipment.metadata.deletionTimestamp,
+                  ':uno: ring-primary ring-1': isChecked(equipment),
+                  ':uno: ring-1 ring-red-600': equipment.metadata.deletionTimestamp,
                 }"
-                class="uno: hover:shadow drag-element "
+                class=":uno: hover:shadow drag-element "
                 @click="handleOpenEditingModal(equipment)"
               >
-                <div class="uno: group relative bg-white">
-                  <div class="uno: block aspect-16/9 size-full cursor-pointer overflow-hidden bg-gray-100 relative">
+                <div class=":uno: group relative bg-white">
+                  <div class=":uno: block aspect-16/9 size-full cursor-pointer overflow-hidden bg-gray-100 relative">
                     <LazyImage
                       :key="equipment.metadata.name"
                       :alt="equipment.spec.displayName"
@@ -423,13 +423,13 @@ const onEditingModalClose = () => {
                       classes="size-full pointer-events-none group-hover:opacity-75"
                     >
                       <template #loading>
-                        <div class="uno: h-full flex justify-center">
+                        <div class=":uno: h-full flex justify-center">
                           <VLoading></VLoading>
                         </div>
                       </template>
                       <template #error>
-                        <div class="uno: h-full flex items-center justify-center object-cover">
-                          <span class="uno: text-xs text-red-400"> 加载异常 </span>
+                        <div class=":uno: h-full flex items-center justify-center object-cover">
+                          <span class=":uno: text-xs text-red-400"> 加载异常 </span>
                         </div>
                       </template>
                     </LazyImage>
@@ -437,27 +437,27 @@ const onEditingModalClose = () => {
 
                   <p
                     v-tooltip="equipment.spec.displayName"
-                    class="uno: block cursor-pointer truncate px-2 py-1 text-center text-xs text-gray-700 font-medium"
+                    class=":uno: block cursor-pointer truncate px-2 py-1 text-center text-xs text-gray-700 font-medium"
                   >
                     {{ equipment.spec.displayName }}
                   </p>
 
-                  <div v-if="equipment.metadata.deletionTimestamp" class="uno: absolute top-1 right-1 text-xs text-red-300">
+                  <div v-if="equipment.metadata.deletionTimestamp" class=":uno: absolute top-1 right-1 text-xs text-red-300">
                     删除中...
                   </div>
 
                   <div
                     v-if="!equipment.metadata.deletionTimestamp"
                     v-permission="['plugin:equipment:manage']"
-                    :class="{ 'uno: !flex': selectedEquipments.has(equipment) }"
-                    class="uno: absolute left-0 top-0 hidden h-1/3 w-full cursor-pointer justify-end from-gray-300 to-transparent bg-gradient-to-b ease-in-out group-hover:flex"
+                    :class="{ ':uno: !flex': selectedEquipments.has(equipment) }"
+                    class=":uno: absolute left-0 top-0 hidden h-1/3 w-full cursor-pointer justify-end from-gray-300 to-transparent bg-gradient-to-b ease-in-out group-hover:flex"
                     @click.stop="selectedEquipments.has(equipment) ? selectedEquipments.delete(equipment) : selectedEquipments.add(equipment)"
                   >
                     <IconCheckboxFill
                       :class="{
-                        'uno: !text-primary': selectedEquipments.has(equipment),
+                        ':uno: !text-primary': selectedEquipments.has(equipment),
                       }"
-                      class="uno: hover:text-primary mr-1 mt-1 h-6 w-6 cursor-pointer text-white transition-all"
+                      class=":uno: hover:text-primary mr-1 mt-1 h-6 w-6 cursor-pointer text-white transition-all"
                     />
                   </div>
                 </div>

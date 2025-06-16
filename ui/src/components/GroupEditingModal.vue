@@ -141,7 +141,6 @@ watch(Meta_Enter, (v) => {
       </div>
       <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
         <AnnotationsForm
-          v-if="visible"
           :key="formState.metadata.name"
           ref="annotationsGroupFormRef"
           :value="formState.metadata.annotations"
