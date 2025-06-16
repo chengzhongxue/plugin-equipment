@@ -1,25 +1,22 @@
 <script lang="ts" setup>
 import type { EquipmentGroup } from "@/types";
-import { reset, submitForm } from "@formkit/core";
+import { submitForm } from "@formkit/core";
 import { axiosInstance } from "@halo-dev/api-client";
 import { VButton, VModal, VSpace } from "@halo-dev/components";
 import { useMagicKeys } from "@vueuse/core";
 import { cloneDeep } from "lodash-es";
-import { computed, nextTick, ref, watch } from "vue";
+import {computed, nextTick, onMounted, ref, useTemplateRef, watch} from "vue";
 
 const props = withDefaults(
   defineProps<{
-    visible: boolean;
-    group: EquipmentGroup | null;
+    group?: EquipmentGroup;
   }>(),
   {
-    visible: false,
-    group: null,
+    group: undefined,
   }
 );
 
 const emit = defineEmits<{
-  (event: "update:visible", visible: boolean): void;
   (event: "close"): void;
 }>();
 
@@ -40,7 +37,8 @@ const initialFormState: EquipmentGroup = {
 };
 
 const formState = ref<EquipmentGroup>(initialFormState);
-const saving = ref(false);
+const isSubmitting = ref(false);
+const modal = useTemplateRef<InstanceType<typeof VModal> | null>("modal");
 
 const isUpdateMode = computed(() => {
   return !!formState.value.metadata.creationTimestamp;
@@ -63,7 +61,7 @@ const handleCreateOrUpdateGroup = async () => {
     ...customAnnotations,
   };
   try {
-    saving.value = true;
+    isSubmitting.value = true;
     if (isUpdateMode.value) {
       await axiosInstance.put(
         `/apis/equipment.kunkunyu.com/v1alpha1/equipmentgroups/${formState.value.metadata.name}`,
@@ -72,36 +70,19 @@ const handleCreateOrUpdateGroup = async () => {
     } else {
       await axiosInstance.post("/apis/equipment.kunkunyu.com/v1alpha1/equipmentgroups", formState.value);
     }
-    onVisibleChange(false);
+    modal.value?.close();
   } catch (e) {
     console.error("Failed to create equipment group", e);
   } finally {
-    saving.value = false;
+    isSubmitting.value = false;
   }
 };
 
-const onVisibleChange = (visible: boolean) => {
-  emit("update:visible", visible);
-  if (!visible) {
-    emit("close");
+onMounted(() => {
+  if (props.group) {
+    formState.value = cloneDeep(props.group);
   }
-};
-
-const handleResetForm = () => {
-  formState.value = cloneDeep(initialFormState);
-  reset("equipment-group-form");
-};
-
-watch(
-  () => props.visible,
-  (visible) => {
-    if (visible && props.group) {
-      formState.value = cloneDeep(props.group);
-      return;
-    }
-    handleResetForm();
-  }
-);
+});
 
 const { ControlLeft_Enter, Meta_Enter } = useMagicKeys();
 
@@ -118,23 +99,21 @@ watch(Meta_Enter, (v) => {
 });
 </script>
 <template>
-  <VModal :visible="visible" :width="600" :title="modalTitle" @update:visible="onVisibleChange">
+  <VModal ref="modal" :width="600" :title="modalTitle" @close="emit('close')">
     <FormKit
       id="equipment-group-form"
       v-model="formState.spec"
       name="equipment-group-form"
-      :classes="{ form: 'w-full' }"
       type="form"
-      :config="{ validationVisibility: 'submit' }"
       @submit="handleCreateOrUpdateGroup"
     >
-      <div class="md:grid md:grid-cols-4 md:gap-6">
-        <div class="md:col-span-1">
-          <div class="sticky top-0">
-            <span class="text-base font-medium text-gray-900"> 常规 </span>
+      <div class=":uno: md:grid md:grid-cols-4 md:gap-6">
+        <div class=":uno: md:col-span-1">
+          <div class=":uno: sticky top-0">
+            <span class=":uno: text-base text-gray-900 font-medium"> 常规 </span>
           </div>
         </div>
-        <div class="mt-5 divide-y divide-gray-100 md:col-span-3 md:mt-0">
+        <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
           <FormKit
             name="displayName"
             label="分组名称"
@@ -151,16 +130,16 @@ watch(Meta_Enter, (v) => {
         </div>
       </div>
     </FormKit>
-    <div class="py-5">
-      <div class="border-t border-gray-200"></div>
+    <div class=":uno: py-5">
+      <div class=":uno: border-t border-gray-200"></div>
     </div>
-    <div class="md:grid md:grid-cols-4 md:gap-6">
-      <div class="md:col-span-1">
-        <div class="sticky top-0">
-          <span class="text-base font-medium text-gray-900"> 元数据 </span>
+    <div class=":uno: md:grid md:grid-cols-4 md:gap-6">
+      <div class=":uno: md:col-span-1">
+        <div class=":uno: sticky top-0">
+          <span class=":uno: text-base text-gray-900 font-medium"> 元数据 </span>
         </div>
       </div>
-      <div class="mt-5 divide-y divide-gray-100 md:col-span-3 md:mt-0">
+      <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
         <AnnotationsForm
           v-if="visible"
           :key="formState.metadata.name"
@@ -173,10 +152,10 @@ watch(Meta_Enter, (v) => {
     </div>
     <template #footer>
       <VSpace>
-        <VButton type="secondary" @click="submitForm('equipment-group-form')">
+        <VButton :loading="isSubmitting" type="secondary" @click="submitForm('equipment-group-form')">
           提交 {{ `${isMac ? "⌘" : "Ctrl"} + ↵` }}
         </VButton>
-        <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
+        <VButton @click="emit('close')">取消 Esc</VButton>
       </VSpace>
     </template>
   </VModal>
