@@ -33,7 +33,7 @@ const removeFileExtension = (filename: string) => {
 };
 
 const selectedEquipment = ref<Equipment | undefined>();
-const selectedEquipments = ref<Set<Equipment>>(new Set<Equipment>());
+const selectedEquipmentNames = ref<string[]>([]);
 const selectedGroup = ref<string>();
 const editingModal = ref(false);
 const checkedAll = ref(false);
@@ -155,10 +155,11 @@ const handleDeleteInBatch = () => {
     confirmType: "danger",
     onConfirm: async () => {
       try {
-        const promises = Array.from(selectedEquipments.value).map((equipment) => {
-          return axiosInstance.delete(`/apis/equipment.kunkunyu.com/v1alpha1/equipments/${equipment.metadata.name}`);
+        const promises = selectedEquipmentNames.value.map((name) => {
+          return axiosInstance.delete(`/apis/equipment.kunkunyu.com/v1alpha1/equipments/${name}`);
         });
         await Promise.all(promises);
+        checkedAll.value = false;
       } catch (e) {
         console.error(e);
       } finally {
@@ -169,65 +170,61 @@ const handleDeleteInBatch = () => {
 };
 
 async function handleMoveInBatch(group: EquipmentGroup) {
-  const equipmentsToUpdate = Array.from(selectedEquipments.value)
-    ?.map((selectedEquipment) => {
-      return equipments.value?.find((equipment) => equipment.metadata.name === selectedEquipment.metadata.name);
+  const equipmentsToUpdate = selectedEquipmentNames.value
+    ?.map((name) => {
+      return equipments.value?.find((equipment) => equipment.metadata.name === name);
     })
     .filter(Boolean) as Equipment[];
 
   const requests = equipmentsToUpdate.map((equipment) => {
-    return axiosInstance.patch("/apis/equipment.kunkunyu.com/v1alpha1/equipments",{
-      name: equipment.metadata.name,
-      jsonPatchInner: [
-        {
-          op: "add",
-          path: "/spec/groupName",
-          value: group.metadata.name || "",
-        },
-      ],
+    const patchDoc = [
+      {
+        op: "add",
+        path: "/spec/groupName",
+        value: group.metadata.name || "",
+      },
+    ];
+    return axiosInstance.patch(`/apis/equipment.kunkunyu.com/v1alpha1/equipments/${equipment.metadata.name}`, JSON.stringify(patchDoc), {
+      headers: {
+        'Content-Type': 'application/json-patch+json'
+      }
     });
   });
 
   if (requests) await Promise.all(requests);
 
-  refetch();
 
-  selectedEquipments.value = new Set<Equipment>();
+  await pageRefetch();
   checkedAll.value = false;
-
+  
   Toast.success("移动成功");
 }
 
 const handleCheckAllChange = (e: Event) => {
   const { checked } = e.target as HTMLInputElement;
-  handleCheckAll(checked);
-};
-
-const handleCheckAll = (checkAll: boolean) => {
-  if (checkAll) {
-    equipments.value?.forEach((equipment) => {
-      selectedEquipments.value.add(equipment);
-    });
+  checkedAll.value = checked;
+  if (checkedAll.value) {
+    selectedEquipmentNames.value =
+      equipments.value?.map((equipment) => {
+        return equipment.metadata.name;
+      }) || [];
   } else {
-    selectedEquipments.value.clear();
+    selectedEquipmentNames.value.length = 0;
   }
 };
 
 const isChecked = (equipment: Equipment) => {
   return (
     equipment.metadata.name === selectedEquipment.value?.metadata.name ||
-    Array.from(selectedEquipments.value)
-      .map((item) => item.metadata.name)
+    selectedEquipmentNames.value
+      .map((name) => name)
       .includes(equipment.metadata.name)
   );
 };
 
-watch(
-  () => selectedEquipments.value.size,
-  (newValue) => {
-    checkedAll.value = newValue === equipments.value?.length;
-  }
-);
+watch(selectedEquipmentNames, (newValue) => {
+  checkedAll.value = newValue.length === equipments.value?.length;
+});
 
 // search
 let fuse: Fuse<Equipment> | undefined = undefined;
@@ -367,7 +364,7 @@ const groupSelectHandle = (group?: string) => {
 const pageRefetch = async () => {
   await groupListRef.value.refetch();
   await refetch();
-  selectedEquipments.value = new Set<Equipment>();
+  selectedEquipmentNames.value.length = 0;
 };
 
 const onEditingModalClose = () => {
@@ -413,7 +410,7 @@ const onEditingModalClose = () => {
                   <input v-model="checkedAll" type="checkbox" @change="handleCheckAllChange" />
                 </div>
                 <div class=":uno: w-full flex flex-1 sm:w-auto">
-                  <SearchInput v-if="!selectedEquipments.size" v-model="keyword" />
+                  <SearchInput v-if="!selectedEquipmentNames.length" v-model="keyword" />
                   <VSpace v-else>
                     <VButton type="danger" @click="handleDeleteInBatch"> 删除 </VButton>
                     <VDropdown>
@@ -520,13 +517,13 @@ const onEditingModalClose = () => {
                   <div
                     v-if="!equipment.metadata.deletionTimestamp"
                     v-permission="['plugin:equipment:manage']"
-                    :class="{ ':uno: !flex': selectedEquipments.has(equipment) }"
+                    :class="{ ':uno: !flex': selectedEquipmentNames.includes(equipment.metadata.name) }"
                     class=":uno: absolute left-0 top-0 hidden h-1/3 w-full cursor-pointer justify-end from-gray-300 to-transparent bg-gradient-to-b ease-in-out group-hover:flex"
-                    @click.stop="selectedEquipments.has(equipment) ? selectedEquipments.delete(equipment) : selectedEquipments.add(equipment)"
+                    @click.stop="selectedEquipmentNames.includes(equipment.metadata.name) ? selectedEquipmentNames.splice(selectedEquipmentNames.indexOf(equipment.metadata.name), 1) : selectedEquipmentNames.push(equipment.metadata.name)"
                   >
                     <IconCheckboxFill
                       :class="{
-                        ':uno: !text-primary': selectedEquipments.has(equipment),
+                        ':uno: !text-primary': selectedEquipmentNames.includes(equipment.metadata.name),
                       }"
                       class=":uno: hover:text-primary mr-1 mt-1 h-6 w-6 cursor-pointer text-white transition-all"
                     />

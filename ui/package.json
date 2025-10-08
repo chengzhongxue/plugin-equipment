@@ -19,7 +19,8 @@
     "fuse.js": "^6.6.2",
     "lodash-es": "^4.17.21",
     "vue": "^3.5.16",
-    "vue-draggable-plus": "^0.6.0"
+    "vue-draggable-plus": "^0.6.0",
+    "qs": "^6.11.2"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.229",
