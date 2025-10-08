@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import LazyImage from "@/components/LazyImage.vue";
 import EquipmentEditingModal from "@/components/EquipmentEditingModal.vue";
-import type {Equipment, EquipmentList} from "@/types";
+import type {Equipment, EquipmentGroup, EquipmentGroupList, EquipmentList} from "@/types";
 import { axiosInstance } from "@halo-dev/api-client";
 import {
   Dialog,
@@ -84,6 +84,33 @@ const {
   refetchOnWindowFocus: false,
 });
 
+const groups = ref<EquipmentGroup[]>([]);
+
+const { refetch: groupRefetch, isLoading: groupIsLoading } = useQuery<EquipmentGroup[]>({
+  queryKey: ["plugin:equipment:groups"],
+  queryFn: async () => {
+    const { data } = await axiosInstance.get<EquipmentGroupList>("/apis/console.api.equipment.kunkunyu.com/v1alpha1/equipmentgroups");
+    return data.items
+      .map((group) => {
+        if (group.spec) {
+          group.spec.priority = group.spec.priority || 0;
+        }
+        return group;
+      })
+      .sort((a, b) => {
+        return (a.spec?.priority || 0) - (b.spec?.priority || 0);
+      });
+  },
+  refetchInterval(data) {
+    const hasDeletingGroup = data?.some((group) => !!group.metadata.deletionTimestamp);
+    return hasDeletingGroup ? 1000 : false;
+  },
+  onSuccess(data) {
+    groups.value = data;
+  },
+  refetchOnWindowFocus: false,
+});
+
 const handleSelectPrevious = () => {
   if (!equipments.value) {
     return;
@@ -140,6 +167,36 @@ const handleDeleteInBatch = () => {
     },
   });
 };
+
+async function handleMoveInBatch(group: EquipmentGroup) {
+  const equipmentsToUpdate = Array.from(selectedEquipments.value)
+    ?.map((selectedEquipment) => {
+      return equipments.value?.find((equipment) => equipment.metadata.name === selectedEquipment.metadata.name);
+    })
+    .filter(Boolean) as Equipment[];
+
+  const requests = equipmentsToUpdate.map((equipment) => {
+    return axiosInstance.patch("/apis/equipment.kunkunyu.com/v1alpha1/equipments",{
+      name: equipment.metadata.name,
+      jsonPatchInner: [
+        {
+          op: "add",
+          path: "/spec/groupName",
+          value: group.metadata.name || "",
+        },
+      ],
+    });
+  });
+
+  if (requests) await Promise.all(requests);
+
+  refetch();
+
+  selectedEquipments.value = new Set<Equipment>();
+  checkedAll.value = false;
+
+  Toast.success("移动成功");
+}
 
 const handleCheckAllChange = (e: Event) => {
   const { checked } = e.target as HTMLInputElement;
@@ -359,6 +416,20 @@ const onEditingModalClose = () => {
                   <SearchInput v-if="!selectedEquipments.size" v-model="keyword" />
                   <VSpace v-else>
                     <VButton type="danger" @click="handleDeleteInBatch"> 删除 </VButton>
+                    <VDropdown>
+                      <VButton type="default">移动</VButton>
+                      <template #popper>
+                        <template v-for="group in groups" :key="group.metadata.name">
+                          <VDropdownItem
+                            v-if="group.metadata.name !== selectedGroup"
+                            v-close-popper.all
+                            @click="handleMoveInBatch(group)"
+                          >
+                            {{ group.spec?.displayName }}
+                          </VDropdownItem>
+                        </template>
+                      </template>
+                    </VDropdown>
                   </VSpace>
                 </div>
                 <div v-if="selectedGroup" v-permission="['plugin:equipment:manage']" class=":uno: mt-4 flex sm:mt-0">
